@@ -284,6 +284,11 @@
 
                 <div class="filters">
                     <input type="text" id="expensesSearch" placeholder="ابحث عن نفقة..." class="search-input">
+                    <select id="expensesGroupFilter" class="filter-select" onchange="filterExpenses()">
+                        <option value="">كل النفقات</option>
+                        <option value="green">نفقات سيارات البن الأخضر</option>
+                        <option value="roasted">نفقات سيارات البن المطحون</option>
+                    </select>
                 </div>
 
                 <div class="table-container">
@@ -291,6 +296,7 @@
                         <thead>
                             <tr>
                                 <th>اللوحة</th>
+                                <th>القسم</th>
                                 <th>نوع النفقة</th>
                                 <th>التاريخ</th>
                                 <th>المبلغ (جنيه)</th>
@@ -300,7 +306,7 @@
                         </thead>
                         <tbody id="expensesTable">
                             <tr class="empty-row">
-                                <td colspan="6">لا توجد نفقات مسجلة</td>
+                                <td colspan="7">لا توجد نفقات مسجلة</td>
                             </tr>
                         </tbody>
                     </table>
@@ -316,18 +322,40 @@
 
                 <div class="card">
                     <h3>ملخص العهدة</h3>
-                    <div class="advance-summary">
-                        <div class="summary-item">
-                            <span class="summary-label">العهدة المتاحة:</span>
-                            <span class="summary-value" id="totalAdvance">0 جنيه</span>
+                    <div class="advance-ledger-grid">
+                        <div class="advance-ledger-card green-ledger">
+                            <h4>عهدة البن الأخضر</h4>
+                            <div class="advance-summary">
+                                <div class="summary-item">
+                                    <span class="summary-label">المتاح</span>
+                                    <span class="summary-value" id="totalAdvanceGreen">0 جنيه</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">المصروف</span>
+                                    <span class="summary-value" id="usedAdvanceGreen">0 جنيه</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">المتبقي</span>
+                                    <span class="summary-value" id="remainingAdvanceGreen">0 جنيه</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="summary-item">
-                            <span class="summary-label">المصروف من العهدة:</span>
-                            <span class="summary-value" id="usedAdvance">0 جنيه</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">المتبقي من العهدة:</span>
-                            <span class="summary-value" id="remainingAdvance">0 جنيه</span>
+                        <div class="advance-ledger-card roasted-ledger">
+                            <h4>عهدة البن المطحون</h4>
+                            <div class="advance-summary">
+                                <div class="summary-item">
+                                    <span class="summary-label">المتاح</span>
+                                    <span class="summary-value" id="totalAdvanceRoasted">0 جنيه</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">المصروف</span>
+                                    <span class="summary-value" id="usedAdvanceRoasted">0 جنيه</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">المتبقي</span>
+                                    <span class="summary-value" id="remainingAdvanceRoasted">0 جنيه</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -337,6 +365,7 @@
                         <thead>
                             <tr>
                                 <th>المبلغ (جنيه)</th>
+                                <th>العهدة</th>
                                 <th>التاريخ</th>
                                 <th>الحالة</th>
                                 <th>الملاحظات</th>
@@ -345,7 +374,7 @@
                         </thead>
                         <tbody id="advanceTable">
                             <tr class="empty-row">
-                                <td colspan="5">لا توجد عهد مسجلة</td>
+                                <td colspan="6">لا توجد عهد مسجلة</td>
                             </tr>
                         </tbody>
                     </table>
@@ -381,7 +410,11 @@
 
                     <div class="card report-card">
                         <h3>💰 تقرير المصروفات</h3>
-                        <p>تقرير شامل لجميع المصروفات والنفقات</p>
+                        <p>اختر نوع السيارات ثم اعرض تقرير المصروفات</p>
+                        <select id="expensesReportGroup" class="filter-select report-select">
+                            <option value="roasted">سيارات البن المطحون ونقل الموظفين</option>
+                            <option value="green">سيارات البن الأخضر</option>
+                        </select>
                         <div class="report-buttons">
                             <button class="btn btn-small btn-primary" onclick="openExpensesFilterModal()">⚙️ فلتر</button>
                             <button class="btn btn-small btn-info" onclick="generateExpensesReportPDF()">PDF</button>
@@ -411,7 +444,11 @@
 
                     <div class="card report-card">
                         <h3>💰 تقرير النفقات والعهدة</h3>
-                        <p>تفاصيل النفقات والعهدة مع التوقيعات الرسمية</p>
+                        <p>تقرير رسمي منفصل لكل عهدة</p>
+                        <select id="advanceReportGroup" class="filter-select report-select">
+                            <option value="roasted">عهدة البن المطحون</option>
+                            <option value="green">عهدة البن الأخضر</option>
+                        </select>
                         <div class="report-buttons">
                             <button class="btn btn-small btn-primary" onclick="generateAdvanceExpensesReportPDF()">PDF</button>
                             <button class="btn btn-small btn-success" onclick="generateAdvanceExpensesReportExcel()">Excel</button>
@@ -662,6 +699,13 @@
             <form id="expensesForm">
                 <div class="form-row">
                     <div class="form-group">
+                        <label>نوع النفقات *</label>
+                        <select id="expensesFleetGroup" required onchange="refreshExpensesModalOptions()">
+                            <option value="roasted">نفقات سيارات البن المطحون</option>
+                            <option value="green">نفقات سيارات البن الأخضر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>لوحة المركبة</label>
                         <select id="expensesVehicle">
                             <option value="">اختر مركبة (اختياري)</option>
@@ -724,6 +768,13 @@
             <form id="advanceForm">
                 <div class="form-row">
                     <div class="form-group">
+                        <label>نوع العهدة *</label>
+                        <select id="advanceFleetGroup" required>
+                            <option value="roasted">عهدة البن المطحون</option>
+                            <option value="green">عهدة البن الأخضر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>المبلغ (جنيه) *</label>
                         <input type="number" id="advanceAmount" required min="0" step="0.01" placeholder="أدخل مبلغ العهدة">
                     </div>
@@ -753,6 +804,13 @@
             <h2>فلترة تقرير المصروفات</h2>
             <form id="expensesFilterForm">
                 <div class="form-row">
+                    <div class="form-group">
+                        <label>نوع التقرير</label>
+                        <select id="expensesFilterGroup">
+                            <option value="roasted">سيارات البن المطحون ونقل الموظفين</option>
+                            <option value="green">سيارات البن الأخضر</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>من التاريخ</label>
                         <input type="date" id="expensesFromDate">
@@ -784,4 +842,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-

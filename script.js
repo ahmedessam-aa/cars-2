@@ -1,4 +1,4 @@
-let licenseWarningDays = 20;
+﻿let licenseWarningDays = 20;
 let editingVehicleId = null;
 let editingViolationId = null;
 let listenersInitialized = false;
@@ -110,14 +110,14 @@ function exportAllDataToExcel() {
             },
             {
                 name: 'النفقات',
-                headers: ['اللوحة', 'نوع النفقة', 'التاريخ', 'المبلغ', 'رقم العهدة', 'الملاحظات'],
-                keys: ['plate_number', 'expense_type', 'expense_date', 'amount', 'advance_id', 'notes'],
+                headers: ['نوع السيارات', 'اللوحة', 'نوع النفقة', 'التاريخ', 'المبلغ', 'رقم العهدة', 'الملاحظات'],
+                keys: ['fleet_group', 'plate_number', 'expense_type', 'expense_date', 'amount', 'advance_id', 'notes'],
                 data: appData.expenses
             },
             {
                 name: 'العهدة',
-                headers: ['المبلغ', 'تاريخ العهدة', 'نشطة', 'الملاحظات'],
-                keys: ['amount', 'advance_date', 'is_active', 'notes'],
+                headers: ['نوع العهدة', 'المبلغ', 'تاريخ العهدة', 'نشطة', 'الملاحظات'],
+                keys: ['fleet_group', 'amount', 'advance_date', 'is_active', 'notes'],
                 data: appData.advance
             }
         ];
@@ -129,6 +129,9 @@ function exportAllDataToExcel() {
                     const value = item[key];
                     if (key === 'is_active') {
                         return value ? 'نعم' : 'لا';
+                    }
+                    if (key === 'fleet_group') {
+                        return getFleetGroupLabel(value);
                     }
                     return value !== undefined && value !== null ? value : '';
                 }));
@@ -835,7 +838,7 @@ function populateAdvanceList() {
         const statusBadge = advance.is_active ? 'status-in-progress' : 'status-complete';
         
         row.innerHTML = `
-            <td>${advance.amount.toLocaleString('ar-SA')} جنيه</td>
+            <td>${advance.amount.toLocaleString('en-US')} جنيه</td>
             <td>${advance.advance_date}</td>
             <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
             <td>${advance.notes || '-'}</td>
@@ -856,9 +859,9 @@ function updateAdvanceSummary() {
     const usedAdvance = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
     const remainingAdvance = totalAdvance - usedAdvance;
 
-    document.getElementById('totalAdvance').textContent = totalAdvance.toLocaleString('ar-SA') + ' جنيه';
-    document.getElementById('usedAdvance').textContent = usedAdvance.toLocaleString('ar-SA') + ' جنيه';
-    document.getElementById('remainingAdvance').textContent = remainingAdvance.toLocaleString('ar-SA') + ' جنيه';
+    document.getElementById('totalAdvance').textContent = totalAdvance.toLocaleString('en-US') + ' جنيه';
+    document.getElementById('usedAdvance').textContent = usedAdvance.toLocaleString('en-US') + ' جنيه';
+    document.getElementById('remainingAdvance').textContent = remainingAdvance.toLocaleString('en-US') + ' جنيه';
 }
 
 function populateExpensesList() {
@@ -926,7 +929,7 @@ function renderDashboard() {
             return mDate.getMonth() === currentMonth && mDate.getFullYear() === currentYear;
         })
         .reduce((sum, m) => sum + m.cost, 0);
-    document.getElementById('monthlyExpenses').textContent = monthlyExpenses.toLocaleString('ar-SA') + ' جنيه';
+    document.getElementById('monthlyExpenses').textContent = monthlyExpenses.toLocaleString('en-US') + ' جنيه';
 
     const totalViolations = appData.violations.length;
     document.getElementById('totalViolations').textContent = totalViolations;
@@ -1049,7 +1052,7 @@ function filterVehicles() {
             <td><span class="status-badge status-${vehicle.status === 'نشطة' ? 'active' : vehicle.status === 'في الصيانة' ? 'maintenance' : 'inactive'}">${vehicle.status}</span></td>
             <td>${licenseStatus}</td>
             <td>${vehicle.violation_count || 0}</td>
-            <td>${(vehicle.violation_paid || 0).toLocaleString('ar-SA')}</td>
+            <td>${(vehicle.violation_paid || 0).toLocaleString('en-US')}</td>
             <td>
                 <div class="action-buttons">
                     <button class="btn btn-primary btn-small" onclick="openVehicleModal('${vehicle.id}')">تعديل</button>
@@ -1092,7 +1095,7 @@ function filterMaintenance() {
             <td>${vehiclePlate}</td>
             <td>${maintenance.maintenance_type}</td>
             <td>${maintenance.maintenance_date}</td>
-            <td>${maintenance.cost.toLocaleString('ar-SA')} جنيه</td>
+            <td>${maintenance.cost.toLocaleString('en-US')} جنيه</td>
             <td><span class="status-badge ${maintenance.status === 'مكتملة' ? 'status-complete' : 'status-in-progress'}">${maintenance.status}</span></td>
             <td>${maintenance.notes || '-'}</td>
             <td>
@@ -1354,7 +1357,7 @@ function generateMaintenanceReportHTML() {
                 <td style="padding: 10px; border: 1px solid #ddd;">${vehiclePlate}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.maintenance_type}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.maintenance_date}</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.cost.toLocaleString('ar-SA')} جنيه</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.cost.toLocaleString('en-US')} جنيه</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.status}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">${maintenance.notes || '-'}</td>
             </tr>
@@ -1366,7 +1369,7 @@ function generateMaintenanceReportHTML() {
                 <tfoot>
                     <tr style="background-color: #ecf0f1; font-weight: bold;">
                         <td colspan="3" style="padding: 12px; border: 1px solid #ddd; text-align: left;">إجمالي التكاليف:</td>
-                        <td style="padding: 12px; border: 1px solid #ddd;">${totalCost.toLocaleString('ar-SA')} جنيه</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${totalCost.toLocaleString('en-US')} جنيه</td>
                         <td colspan="2" style="padding: 12px; border: 1px solid #ddd;"></td>
                     </tr>
                 </tfoot>
@@ -1488,7 +1491,7 @@ function generateExpensesReportHTML() {
         
         appData.maintenance.forEach((m, idx) => {
             const bgColor = idx % 2 === 0 ? '#fafafa' : '#ffffff';
-            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${m.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${m.cost.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${m.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${m.cost.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -1496,7 +1499,7 @@ function generateExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #d4edda; font-weight: bold; height: 13px;">
                             <td colspan="3" style="padding: 2px 3px; border: 1px solid #999; text-align: right; font-size: 10px;">إجمالي</td>
-                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #27ae60; font-size: 11px;">${totalMaintenance.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #27ae60; font-size: 11px;">${totalMaintenance.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -1524,7 +1527,7 @@ function generateExpensesReportHTML() {
         
         paidViolations.forEach((v, idx) => {
             const bgColor = idx % 2 === 0 ? '#fafafa' : '#ffffff';
-            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${v.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${v.amount.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${v.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${v.amount.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -1532,7 +1535,7 @@ function generateExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #ffebee; font-weight: bold; height: 13px;">
                             <td colspan="3" style="padding: 2px 3px; border: 1px solid #999; text-align: right; font-size: 10px;">إجمالي</td>
-                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #e74c3c; font-size: 11px;">${totalViolations.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #e74c3c; font-size: 11px;">${totalViolations.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -1559,7 +1562,7 @@ function generateExpensesReportHTML() {
         
         appData.expenses.forEach((e, idx) => {
             const bgColor = idx % 2 === 0 ? '#fafafa' : '#ffffff';
-            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${e.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${e.amount.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 12px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 10px; font-weight: bold;">${e.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold; font-size: 10px;">${e.amount.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -1567,7 +1570,7 @@ function generateExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #fffbea; font-weight: bold; height: 13px;">
                             <td colspan="3" style="padding: 2px 3px; border: 1px solid #999; text-align: right; font-size: 10px;">إجمالي</td>
-                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #f39c12; font-size: 11px;">${totalExpenses.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 2px 3px; border: 1px solid #999; text-align: center; color: #f39c12; font-size: 11px;">${totalExpenses.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -1583,19 +1586,19 @@ function generateExpensesReportHTML() {
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                 <tr style="height: 13px;">
                     <td style="padding: 3px 4px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.3);">🔧 مصاريف الصيانة</td>
-                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3);">${totalMaintenance.toLocaleString('ar-SA')}</td>
+                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3);">${totalMaintenance.toLocaleString('en-US')}</td>
                 </tr>
                 <tr style="height: 13px;">
                     <td style="padding: 3px 4px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.3);">⚠️ مصاريف المخالفات المسددة</td>
-                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3);">${totalViolations.toLocaleString('ar-SA')}</td>
+                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3);">${totalViolations.toLocaleString('en-US')}</td>
                 </tr>
                 <tr style="height: 13px;">
                     <td style="padding: 3px 4px; text-align: right; border-bottom: 2px solid white;">💰 مصاريف النفقات</td>
-                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 2px solid white;">${totalExpenses.toLocaleString('ar-SA')}</td>
+                    <td style="padding: 3px 4px; text-align: center; font-weight: bold; border-bottom: 2px solid white;">${totalExpenses.toLocaleString('en-US')}</td>
                 </tr>
                 <tr style="height: 15px;">
                     <td style="padding: 4px; font-size: 12px; text-align: right; font-weight: bold;">💵 إجمالي المصروفات</td>
-                    <td style="padding: 4px; font-size: 13px; text-align: center; font-weight: bold; color: #fff000;">${expensesGrandTotal.toLocaleString('ar-SA')} جنيه</td>
+                    <td style="padding: 4px; font-size: 13px; text-align: center; font-weight: bold; color: #fff000;">${expensesGrandTotal.toLocaleString('en-US')} جنيه</td>
                 </tr>
             </table>
         </div>
@@ -2224,7 +2227,7 @@ function generateFilteredExpensesReportHTML() {
         
         filteredMaintenance.forEach((m, idx) => {
             const bgColor = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
-            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${m.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${m.cost.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${m.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${m.maintenance_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${m.cost.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -2232,7 +2235,7 @@ function generateFilteredExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #ecf0f1; font-weight: bold; height: 12px;">
                             <td colspan="3" style="padding: 3px 4px; border: 0.5px solid #999; text-align: right;">الإجمالي</td>
-                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #27ae60;">${totalMaintenance.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #27ae60;">${totalMaintenance.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -2258,7 +2261,7 @@ function generateFilteredExpensesReportHTML() {
         
         filteredViolations.forEach((v, idx) => {
             const bgColor = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
-            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${v.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${v.amount.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${v.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${v.violation_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${v.amount.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -2266,7 +2269,7 @@ function generateFilteredExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #ecf0f1; font-weight: bold; height: 12px;">
                             <td colspan="3" style="padding: 3px 4px; border: 0.5px solid #999; text-align: right;">الإجمالي</td>
-                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #e74c3c;">${totalViolations.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #e74c3c;">${totalViolations.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -2292,7 +2295,7 @@ function generateFilteredExpensesReportHTML() {
         
         filteredExpenses.forEach((e, idx) => {
             const bgColor = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
-            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${e.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${e.amount.toLocaleString('ar-SA')}</td></tr>`;
+            html += `<tr style="background-color: ${bgColor}; height: 11px;"><td style="padding: 2px 3px; border: 0.5px solid #ddd;">${e.plate_number || '-'}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_type}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; font-size: 9px;">${e.expense_date}</td><td style="padding: 2px 3px; border: 0.5px solid #ddd; text-align: center; font-weight: bold;">${e.amount.toLocaleString('en-US')}</td></tr>`;
         });
 
         html += `
@@ -2300,7 +2303,7 @@ function generateFilteredExpensesReportHTML() {
                     <tfoot>
                         <tr style="background-color: #ecf0f1; font-weight: bold; height: 12px;">
                             <td colspan="3" style="padding: 3px 4px; border: 0.5px solid #999; text-align: right;">الإجمالي</td>
-                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #f39c12;">${totalExpenses.toLocaleString('ar-SA')}</td>
+                            <td style="padding: 3px 4px; border: 0.5px solid #999; text-align: center; color: #f39c12;">${totalExpenses.toLocaleString('en-US')}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -2313,10 +2316,10 @@ function generateFilteredExpensesReportHTML() {
     html += `
         <div style="margin-top: 12px; padding: 10px; background-color: #1a252f; color: white; border-radius: 3px;">
             <table style="width: 100%; border-collapse: collapse;">
-                <tr style="height: 14px;"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي الصيانة:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalMaintenance.toLocaleString('ar-SA')}</td></tr>
-                <tr style="height: 14px; background-color: rgba(255,255,255,0.1);"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي المخالفات:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalViolations.toLocaleString('ar-SA')}</td></tr>
-                <tr style="height: 14px;"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي النفقات:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalExpenses.toLocaleString('ar-SA')}</td></tr>
-                <tr style="height: 16px; border-top: 2px solid white;"><td style="padding: 5px; font-size: 12px; font-weight: bold; text-align: right;">🔴 الإجمالي العام:</td><td style="padding: 5px; font-size: 13px; font-weight: bold; text-align: center; color: #ffd700;">${grandTotal.toLocaleString('ar-SA')} جنيه</td></tr>
+                <tr style="height: 14px;"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي الصيانة:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalMaintenance.toLocaleString('en-US')}</td></tr>
+                <tr style="height: 14px; background-color: rgba(255,255,255,0.1);"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي المخالفات:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalViolations.toLocaleString('en-US')}</td></tr>
+                <tr style="height: 14px;"><td style="padding: 4px; font-size: 11px; text-align: right;">إجمالي النفقات:</td><td style="padding: 4px; font-size: 11px; font-weight: bold; text-align: center;">${totalExpenses.toLocaleString('en-US')}</td></tr>
+                <tr style="height: 16px; border-top: 2px solid white;"><td style="padding: 5px; font-size: 12px; font-weight: bold; text-align: right;">🔴 الإجمالي العام:</td><td style="padding: 5px; font-size: 13px; font-weight: bold; text-align: center; color: #ffd700;">${grandTotal.toLocaleString('en-US')} جنيه</td></tr>
             </table>
         </div>
     `;
@@ -2376,7 +2379,648 @@ function generateFilteredExpensesReportExcel() {
     closeExpensesFilterModal();
 }
 
+const FLEET_GROUPS = {
+    green: {
+        label: 'سيارات البن الأخضر',
+        advanceLabel: 'عهدة البن الأخضر',
+        statuses: ['اخضر'],
+        color: '#16814d'
+    },
+    roasted: {
+        label: 'سيارات البن المطحون',
+        advanceLabel: 'عهدة البن المطحون',
+        statuses: ['مطحون', 'نقل موظفين'],
+        color: '#8a5a24'
+    }
+};
 
+function normalizeFleetGroup(group) {
+    return group === 'green' ? 'green' : 'roasted';
+}
+
+function getFleetGroupLabel(group) {
+    return FLEET_GROUPS[normalizeFleetGroup(group)].label;
+}
+
+function getAdvanceGroupLabel(group) {
+    return FLEET_GROUPS[normalizeFleetGroup(group)].advanceLabel;
+}
+
+function getVehicleByRecord(record) {
+    if (!record) return null;
+    return appData.vehicles.find(v => v.id === record.vehicle_id) ||
+        appData.vehicles.find(v => v.plate_number === record.plate_number) ||
+        null;
+}
+
+function getVehicleFleetGroup(vehicle) {
+    if (!vehicle) return 'roasted';
+    return FLEET_GROUPS.green.statuses.includes(vehicle.status) ? 'green' : 'roasted';
+}
+
+function getRecordFleetGroup(record) {
+    if (record?.fleet_group) return normalizeFleetGroup(record.fleet_group);
+    return getVehicleFleetGroup(getVehicleByRecord(record));
+}
+
+function recordMatchesFleetGroup(record, group) {
+    return getRecordFleetGroup(record) === normalizeFleetGroup(group);
+}
+
+function getSelectedReportGroup(selectId, fallback = 'roasted') {
+    return normalizeFleetGroup(document.getElementById(selectId)?.value || fallback);
+}
+
+function loadData() {
+    try {
+        appData.vehicles = JSON.parse(localStorage.getItem('vehicles')) || [];
+        appData.maintenance = JSON.parse(localStorage.getItem('maintenance')) || [];
+        appData.violations = JSON.parse(localStorage.getItem('violations')) || [];
+        appData.expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        appData.advance = JSON.parse(localStorage.getItem('advance')) || [];
+
+        let changed = false;
+        appData.expenses.forEach(expense => {
+            if (!expense.fleet_group) {
+                expense.fleet_group = getRecordFleetGroup(expense);
+                changed = true;
+            }
+        });
+        appData.advance.forEach(advance => {
+            if (!advance.fleet_group) {
+                advance.fleet_group = 'roasted';
+                changed = true;
+            }
+        });
+        if (changed) saveData();
+    } catch (error) {
+        console.error('خطأ في تحميل البيانات:', error);
+        appData.vehicles = [];
+        appData.maintenance = [];
+        appData.violations = [];
+        appData.expenses = [];
+        appData.advance = [];
+    }
+}
+
+function refreshExpensesModalOptions(selectedVehicleId = '', selectedAdvanceId = '') {
+    const group = normalizeFleetGroup(document.getElementById('expensesFleetGroup')?.value);
+    const vehicleSelect = document.getElementById('expensesVehicle');
+    const advanceSelect = document.getElementById('expensesAdvance');
+    if (!vehicleSelect || !advanceSelect) return;
+
+    vehicleSelect.innerHTML = '<option value="">اختر مركبة (اختياري)</option>';
+    appData.vehicles
+        .filter(v => getVehicleFleetGroup(v) === group)
+        .forEach(v => {
+            const option = document.createElement('option');
+            option.value = v.id;
+            option.textContent = `${v.plate_number} - ${v.model}`;
+            vehicleSelect.appendChild(option);
+        });
+    vehicleSelect.value = selectedVehicleId || '';
+
+    advanceSelect.innerHTML = '<option value="">لم ترتبط بعهدة</option>';
+    appData.advance
+        .filter(a => a.is_active && normalizeFleetGroup(a.fleet_group) === group)
+        .forEach(a => {
+            const option = document.createElement('option');
+            option.value = a.id;
+            option.textContent = `${getAdvanceGroupLabel(a.fleet_group)} - ${Number(a.amount || 0).toLocaleString('en-US')} جنيه - ${a.advance_date}`;
+            advanceSelect.appendChild(option);
+        });
+    advanceSelect.value = selectedAdvanceId || '';
+}
+
+function openExpensesModal(expenseId = null) {
+    editingExpenseId = expenseId;
+    const modal = document.getElementById('expensesModal');
+    const form = document.getElementById('expensesForm');
+    const title = document.getElementById('expensesModalTitle');
+
+    if (expenseId) {
+        title.textContent = 'تعديل بيانات النفقة';
+        const expense = appData.expenses.find(e => e.id === expenseId);
+        if (expense) {
+            document.getElementById('expensesFleetGroup').value = getRecordFleetGroup(expense);
+            refreshExpensesModalOptions(expense.vehicle_id || '', expense.advance_id || '');
+            document.getElementById('expensesType').value = expense.is_custom_type ? '' : (expense.expense_type || '');
+            document.getElementById('customExpenseType').value = expense.is_custom_type ? expense.expense_type : '';
+            document.getElementById('expensesDate').value = expense.expense_date;
+            document.getElementById('expensesAmount').value = expense.amount;
+            document.getElementById('expensesNotes').value = expense.notes || '';
+        }
+    } else {
+        title.textContent = 'إضافة نفقة جديدة';
+        form.reset();
+        document.getElementById('expensesFleetGroup').value = 'roasted';
+        document.getElementById('customExpenseType').value = '';
+        refreshExpensesModalOptions();
+    }
+
+    modal.classList.add('show');
+}
+
+function handleExpensesSubmit(e) {
+    e.preventDefault();
+
+    const group = normalizeFleetGroup(document.getElementById('expensesFleetGroup').value);
+    const vehicleId = document.getElementById('expensesVehicle').value;
+    const vehicle = vehicleId ? appData.vehicles.find(v => v.id === vehicleId) : null;
+
+    let expenseType = document.getElementById('expensesType').value;
+    let isCustom = false;
+    const customType = document.getElementById('customExpenseType').value.trim();
+
+    if (customType) {
+        expenseType = customType;
+        isCustom = true;
+    }
+
+    const expenseData = {
+        id: editingExpenseId || Date.now().toString(),
+        fleet_group: group,
+        vehicle_id: vehicleId || null,
+        plate_number: vehicle ? vehicle.plate_number : '',
+        expense_type: expenseType,
+        is_custom_type: isCustom,
+        expense_date: document.getElementById('expensesDate').value,
+        amount: parseFloat(document.getElementById('expensesAmount').value),
+        advance_id: document.getElementById('expensesAdvance').value || null,
+        notes: document.getElementById('expensesNotes').value
+    };
+
+    try {
+        if (editingExpenseId) {
+            const index = appData.expenses.findIndex(item => item.id === editingExpenseId);
+            if (index !== -1) appData.expenses[index] = expenseData;
+        } else {
+            appData.expenses.push(expenseData);
+        }
+
+        saveData();
+        closeExpensesModal();
+        populateExpensesList();
+        populateAdvanceList();
+        renderDashboard();
+        alert('تم حفظ بيانات النفقة بنجاح');
+    } catch (error) {
+        console.error('خطأ:', error);
+        alert('حدث خطأ في حفظ البيانات: ' + error.message);
+    }
+}
+
+function handleAdvanceSubmit(e) {
+    e.preventDefault();
+
+    const advanceData = {
+        id: Date.now().toString(),
+        fleet_group: normalizeFleetGroup(document.getElementById('advanceFleetGroup').value),
+        amount: parseFloat(document.getElementById('advanceAmount').value),
+        advance_date: document.getElementById('advanceDate').value,
+        is_active: true,
+        notes: document.getElementById('advanceNotes').value
+    };
+
+    try {
+        appData.advance.push(advanceData);
+        saveData();
+        closeAdvanceModal();
+        populateAdvanceList();
+        renderDashboard();
+        alert('تم إضافة العهدة بنجاح');
+    } catch (error) {
+        console.error('خطأ:', error);
+        alert('حدث خطأ في حفظ البيانات: ' + error.message);
+    }
+}
+
+function populateAdvanceList() {
+    const tbody = document.getElementById('advanceTable');
+    tbody.innerHTML = '';
+
+    if (appData.advance.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">لا توجد عهد مسجلة</td></tr>';
+        updateAdvanceSummary();
+        return;
+    }
+
+    appData.advance.forEach(advance => {
+        const row = document.createElement('tr');
+        const statusText = advance.is_active ? 'نشطة' : 'مستخدمة';
+        const statusBadge = advance.is_active ? 'status-in-progress' : 'status-complete';
+        const group = normalizeFleetGroup(advance.fleet_group);
+
+        row.innerHTML = `
+            <td>${Number(advance.amount || 0).toLocaleString('en-US')} جنيه</td>
+            <td><span class="fleet-pill ${group}">${getAdvanceGroupLabel(group)}</span></td>
+            <td>${advance.advance_date}</td>
+            <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
+            <td>${advance.notes || '-'}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-danger btn-small" onclick="deleteAdvance('${advance.id}')">حذف</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    updateAdvanceSummary();
+}
+
+function updateAdvanceSummary() {
+    ['green', 'roasted'].forEach(group => {
+        const totalAdvance = appData.advance
+            .filter(a => normalizeFleetGroup(a.fleet_group) === group)
+            .reduce((sum, a) => sum + Number(a.amount || 0), 0);
+        const usedAdvance = appData.expenses
+            .filter(e => getRecordFleetGroup(e) === group)
+            .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const remainingAdvance = totalAdvance - usedAdvance;
+        const suffix = group === 'green' ? 'Green' : 'Roasted';
+
+        document.getElementById(`totalAdvance${suffix}`).textContent = totalAdvance.toLocaleString('en-US') + ' جنيه';
+        document.getElementById(`usedAdvance${suffix}`).textContent = usedAdvance.toLocaleString('en-US') + ' جنيه';
+        document.getElementById(`remainingAdvance${suffix}`).textContent = remainingAdvance.toLocaleString('en-US') + ' جنيه';
+    });
+
+    if (document.getElementById('totalAdvance')) {
+        const total = appData.advance.reduce((sum, a) => sum + Number(a.amount || 0), 0);
+        const used = appData.expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        document.getElementById('totalAdvance').textContent = total.toLocaleString('en-US') + ' جنيه';
+        document.getElementById('usedAdvance').textContent = used.toLocaleString('en-US') + ' جنيه';
+        document.getElementById('remainingAdvance').textContent = (total - used).toLocaleString('en-US') + ' جنيه';
+    }
+}
+
+function filterExpenses() {
+    const searchValue = document.getElementById('expensesSearch').value.toLowerCase();
+    const groupFilter = document.getElementById('expensesGroupFilter')?.value || '';
+
+    const filtered = appData.expenses.filter(expense => {
+        const vehiclePlate = expense.plate_number ? expense.plate_number.toLowerCase() : '';
+        const matchesSearch = vehiclePlate.includes(searchValue) ||
+            (expense.expense_type ? expense.expense_type.toLowerCase().includes(searchValue) : false) ||
+            getFleetGroupLabel(getRecordFleetGroup(expense)).toLowerCase().includes(searchValue);
+        const matchesGroup = !groupFilter || getRecordFleetGroup(expense) === groupFilter;
+        return matchesSearch && matchesGroup;
+    });
+
+    const tbody = document.getElementById('expensesTable');
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">لا توجد نفقات مسجلة</td></tr>';
+        return;
+    }
+
+    filtered.forEach(expense => {
+        const group = getRecordFleetGroup(expense);
+        const vehiclePlate = expense.plate_number || 'عام';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${vehiclePlate}</td>
+            <td><span class="fleet-pill ${group}">${getFleetGroupLabel(group)}</span></td>
+            <td>${expense.expense_type}</td>
+            <td>${expense.expense_date}</td>
+            <td>${Number(expense.amount || 0).toLocaleString('en-US')} جنيه</td>
+            <td>${expense.notes || '-'}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-small" onclick="openExpensesModal('${expense.id}')">تعديل</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteExpense('${expense.id}')">حذف</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getFinancialReportData(group) {
+    const fleetGroup = normalizeFleetGroup(group);
+    const maintenance = appData.maintenance.filter(item => recordMatchesFleetGroup(item, fleetGroup));
+    const violations = appData.violations.filter(item => item.status === 'مسددة' && recordMatchesFleetGroup(item, fleetGroup));
+    const expenses = appData.expenses.filter(item => getRecordFleetGroup(item) === fleetGroup);
+    const advance = appData.advance.filter(item => normalizeFleetGroup(item.fleet_group) === fleetGroup);
+    return { maintenance, violations, expenses, advance };
+}
+
+function sumBy(items, key) {
+    return items.reduce((sum, item) => sum + Number(item[key] || 0), 0);
+}
+
+function buildProfessionalReportHTML({ group, title, includeAdvance, data }) {
+    const totalMaintenance = sumBy(data.maintenance, 'cost');
+    const totalViolations = sumBy(data.violations, 'amount');
+    const totalExpenses = sumBy(data.expenses, 'amount');
+    const totalAdvance = sumBy(data.advance, 'amount');
+    const spentTotal = includeAdvance ? totalExpenses : totalMaintenance + totalViolations + totalExpenses;
+    const remainingAdvance = totalAdvance - totalExpenses;
+    const color = FLEET_GROUPS[normalizeFleetGroup(group)].color;
+
+    const renderRows = (items, type) => items.map((item, index) => {
+        const plate = item.plate_number || 'عام';
+        const name = type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type;
+        const date = type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date;
+        const amount = type === 'maintenance' ? item.cost : item.amount;
+        return `
+            <tr style="background:${index % 2 ? '#ffffff' : '#f7f9fb'};">
+                <td>${plate}</td>
+                <td>${name || '-'}</td>
+                <td>${date || '-'}</td>
+                <td class="amount">${Number(amount || 0).toLocaleString('en-US')}</td>
+                <td>${item.notes || '-'}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const section = (heading, rows, total, emptyText) => `
+        <section class="report-section">
+            <div class="section-title">
+                <h3>${heading}</h3>
+                <strong>${Number(total || 0).toLocaleString('en-US')} جنيه</strong>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اللوحة</th>
+                        <th>البيان</th>
+                        <th>التاريخ</th>
+                        <th>المبلغ</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows || `<tr><td colspan="5" class="empty-report">${emptyText}</td></tr>`}
+                </tbody>
+                ${rows ? `
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3">الإجمالي</td>
+                            <td class="amount">${Number(total || 0).toLocaleString('en-US')}</td>
+                            <td>جنيه</td>
+                        </tr>
+                    </tfoot>
+                ` : ''}
+            </table>
+        </section>
+    `;
+
+    return `
+        <div dir="rtl" class="professional-report ${includeAdvance ? 'advance-report' : ''}">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+                .professional-report { font-family: 'Cairo', sans-serif; color: #17202a; padding: 20px; background: #fff; }
+                .report-hero { border: 1px solid #d9e0e7; border-top: 6px solid ${color}; border-radius: 8px; padding: 18px; position: relative; margin-bottom: 14px; }
+                .report-hero img { position: absolute; left: 18px; top: 14px; width: 82px; height: 62px; object-fit: contain; }
+                .report-hero h1 { margin: 0; font-size: 25px; font-weight: 800; }
+                .report-hero h2 { margin: 4px 0 0; font-size: 16px; color: ${color}; font-weight: 800; }
+                .report-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; font-size: 11px; color: #53616f; }
+                .report-meta span { border: 1px solid #dce3ea; border-radius: 999px; padding: 4px 10px; background: #f8fafc; }
+                .kpi-grid { display: grid; grid-template-columns: repeat(${includeAdvance ? 3 : 4}, 1fr); gap: 8px; margin-bottom: 14px; }
+                .kpi { border: 1px solid #dce3ea; border-radius: 8px; padding: 10px; background: #fbfcfe; }
+                .kpi span { display: block; font-size: 10px; color: #5f6f80; margin-bottom: 5px; }
+                .advance-report .kpi span { font-size: 12px; font-weight: 700; }
+                .kpi strong { font-size: 16px; color: #17202a; }
+                .report-section { margin-top: 12px; break-inside: avoid; }
+                .section-title { display: flex; justify-content: space-between; align-items: center; background: ${color}; color: white; padding: 7px 10px; border-radius: 7px 7px 0 0; }
+                .section-title h3 { margin: 0; font-size: 13px; }
+                .section-title strong { font-size: 12px; }
+                table { width: 100%; border-collapse: collapse; font-size: 11px; }
+                th { background: #eef3f7; color: #263645; text-align: right; padding: 7px; border: 1px solid #d7dee6; }
+                td { padding: 6px 7px; border: 1px solid #e0e5eb; }
+                .amount { text-align: center; font-weight: 800; color: ${color}; }
+                .total-row td { background: #f1f5f8; font-weight: 800; border-top: 2px solid ${color}; }
+                .empty-report { text-align: center; color: #7f8c8d; padding: 14px; }
+                .signatures { display: flex; justify-content: space-between; margin-top: 18px; gap: 18px; }
+                .signature { flex: 1; text-align: center; padding-top: 28px; border-top: 1.5px solid #17202a; font-size: 12px; font-weight: 800; }
+            </style>
+            <div class="report-hero">
+                <img src="5.jpg">
+                <h1>مصنع البهنساوي</h1>
+                <h2>${title}</h2>
+                <div class="report-meta">
+                    <span>${getFleetGroupLabel(group)}</span>
+                    <span>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</span>
+                    <span>عدد البنود: ${data.expenses.length + data.maintenance.length + data.violations.length}</span>
+                </div>
+            </div>
+            <div class="kpi-grid">
+                ${includeAdvance ? `
+                    <div class="kpi"><span>العهدة المتاحة</span><strong>${totalAdvance.toLocaleString('en-US')}</strong></div>
+                    <div class="kpi"><span>المصروف من العهدة</span><strong>${totalExpenses.toLocaleString('en-US')}</strong></div>
+                    <div class="kpi"><span>المتبقي</span><strong>${remainingAdvance.toLocaleString('en-US')}</strong></div>
+                ` : `
+                    <div class="kpi"><span>الصيانة</span><strong>${totalMaintenance.toLocaleString('en-US')}</strong></div>
+                    <div class="kpi"><span>المخالفات المسددة</span><strong>${totalViolations.toLocaleString('en-US')}</strong></div>
+                    <div class="kpi"><span>النفقات</span><strong>${totalExpenses.toLocaleString('en-US')}</strong></div>
+                    <div class="kpi"><span>الإجمالي</span><strong>${spentTotal.toLocaleString('en-US')}</strong></div>
+                `}
+            </div>
+            ${includeAdvance ? '' : section('مصاريف الصيانة والتصليح', renderRows(data.maintenance, 'maintenance'), totalMaintenance, 'لا توجد مصاريف صيانة')}
+            ${includeAdvance ? '' : section('المخالفات المسددة', renderRows(data.violations, 'violation'), totalViolations, 'لا توجد مخالفات مسددة')}
+            ${section(includeAdvance ? 'تفاصيل المصروفات المرتبطة بالعهدة' : 'النفقات الإضافية', renderRows(data.expenses, 'expense'), totalExpenses, 'لا توجد نفقات مسجلة')}
+            <div class="signatures">
+                <div class="signature">مدير الحركة</div>
+                <div class="signature">المدير المالي</div>
+            </div>
+        </div>
+    `;
+}
+
+function generateExpensesReportHTML(group = getSelectedReportGroup('expensesReportGroup')) {
+    const data = getFinancialReportData(group);
+    return buildProfessionalReportHTML({
+        group,
+        title: `تقرير المصروفات - ${getFleetGroupLabel(group)}`,
+        includeAdvance: false,
+        data
+    });
+}
+
+function generateExpensesReportPDF() {
+    const group = getSelectedReportGroup('expensesReportGroup');
+    const element = document.createElement('div');
+    element.innerHTML = generateExpensesReportHTML(group);
+    html2pdf().set({
+        margin: 8,
+        filename: `تقرير_مصروفات_${getFleetGroupLabel(group).replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    }).from(element).save();
+}
+
+function generateExpensesReportExcel() {
+    const group = getSelectedReportGroup('expensesReportGroup');
+    exportFinancialReportExcel(group, false, `تقرير_مصروفات_${getFleetGroupLabel(group).replace(/\s+/g, '_')}.xlsx`);
+}
+
+function generateAdvanceExpensesReportHTML(group = getSelectedReportGroup('advanceReportGroup')) {
+    const data = getFinancialReportData(group);
+    return buildProfessionalReportHTML({
+        group,
+        title: `تقرير النفقات والعهدة - ${getAdvanceGroupLabel(group)}`,
+        includeAdvance: true,
+        data
+    });
+}
+
+function generateAdvanceExpensesReportPDF() {
+    const group = getSelectedReportGroup('advanceReportGroup');
+    const element = document.createElement('div');
+    element.innerHTML = generateAdvanceExpensesReportHTML(group);
+    html2pdf().set({
+        margin: 8,
+        filename: `تقرير_العهدة_${getAdvanceGroupLabel(group).replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+    }).from(element).save();
+}
+
+function generateAdvanceExpensesReportExcel() {
+    const group = getSelectedReportGroup('advanceReportGroup');
+    exportFinancialReportExcel(group, true, `تقرير_العهدة_${getAdvanceGroupLabel(group).replace(/\s+/g, '_')}.xlsx`);
+}
+
+function printAdvanceExpensesReport() {
+    const group = getSelectedReportGroup('advanceReportGroup');
+    const printWindow = window.open('', '', 'width=1200,height=800');
+    printWindow.document.write(generateAdvanceExpensesReportHTML(group));
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function printExpensesReport() {
+    const group = getSelectedReportGroup('expensesReportGroup');
+    const printWindow = window.open('', '', 'width=1200,height=800');
+    printWindow.document.write(generateExpensesReportHTML(group));
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function exportFinancialReportExcel(group, includeAdvance, fileName) {
+    const data = getFinancialReportData(group);
+    const rows = [
+        [includeAdvance ? 'تقرير النفقات والعهدة' : 'تقرير المصروفات', getFleetGroupLabel(group)],
+        ['تاريخ التقرير', new Date().toLocaleDateString('ar-EG')],
+        []
+    ];
+
+    if (includeAdvance) {
+        const totalAdvance = sumBy(data.advance, 'amount');
+        const totalExpenses = sumBy(data.expenses, 'amount');
+        rows.push(['العهدة المتاحة', totalAdvance]);
+        rows.push(['المصروف من العهدة', totalExpenses]);
+        rows.push(['المتبقي', totalAdvance - totalExpenses]);
+        rows.push([]);
+    }
+
+    const pushSection = (title, items, type) => {
+        rows.push([title]);
+        rows.push(['اللوحة', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
+        items.forEach(item => {
+            rows.push([
+                item.plate_number || 'عام',
+                type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type,
+                type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date,
+                type === 'maintenance' ? item.cost : item.amount,
+                item.notes || ''
+            ]);
+        });
+        rows.push([]);
+    };
+
+    if (!includeAdvance) {
+        pushSection('الصيانة', data.maintenance, 'maintenance');
+        pushSection('المخالفات المسددة', data.violations, 'violation');
+    }
+    pushSection('النفقات', data.expenses, 'expense');
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, includeAdvance ? 'العهدة' : 'المصروفات');
+    XLSX.writeFile(wb, fileName);
+}
+
+function openExpensesFilterModal() {
+    const reportGroup = document.getElementById('expensesReportGroup')?.value || 'roasted';
+    const filterGroup = document.getElementById('expensesFilterGroup');
+    if (filterGroup) filterGroup.value = reportGroup;
+    document.getElementById('expensesFilterModal').classList.add('show');
+}
+
+function getFilteredExpensesData() {
+    const group = normalizeFleetGroup(document.getElementById('expensesFilterGroup')?.value || 'roasted');
+    const fromDate = document.getElementById('expensesFromDate').value;
+    const toDate = document.getElementById('expensesToDate').value;
+    const fromAmount = parseFloat(document.getElementById('expensesFromAmount').value) || 0;
+    const toAmount = parseFloat(document.getElementById('expensesToAmount').value) || Infinity;
+
+    const data = getFinancialReportData(group);
+    const byDate = (items, key) => items.filter(item => {
+        const dateValue = item[key];
+        if (fromDate && new Date(dateValue) < new Date(fromDate)) return false;
+        if (toDate && new Date(dateValue) > new Date(toDate)) return false;
+        return true;
+    });
+    const byAmount = (items, key) => items.filter(item => Number(item[key] || 0) >= fromAmount && Number(item[key] || 0) <= toAmount);
+
+    return {
+        group,
+        filteredMaintenance: byAmount(byDate(data.maintenance, 'maintenance_date'), 'cost'),
+        filteredViolations: byAmount(byDate(data.violations, 'violation_date'), 'amount'),
+        filteredExpenses: byAmount(byDate(data.expenses, 'expense_date'), 'amount'),
+        filteredAdvance: byAmount(byDate(data.advance, 'advance_date'), 'amount')
+    };
+}
+
+function generateFilteredExpensesReportHTML() {
+    const filtered = getFilteredExpensesData();
+    return buildProfessionalReportHTML({
+        group: filtered.group,
+        title: `تقرير المصروفات المصفى - ${getFleetGroupLabel(filtered.group)}`,
+        includeAdvance: false,
+        data: {
+            maintenance: filtered.filteredMaintenance,
+            violations: filtered.filteredViolations,
+            expenses: filtered.filteredExpenses,
+            advance: filtered.filteredAdvance
+        }
+    });
+}
+
+function generateFilteredExpensesReportExcel() {
+    const filtered = getFilteredExpensesData();
+    const rows = [
+        ['تقرير المصروفات المصفى', getFleetGroupLabel(filtered.group)],
+        ['تاريخ التقرير', new Date().toLocaleDateString('ar-EG')],
+        []
+    ];
+    [
+        ['الصيانة', filtered.filteredMaintenance, 'maintenance'],
+        ['المخالفات المسددة', filtered.filteredViolations, 'violation'],
+        ['النفقات', filtered.filteredExpenses, 'expense']
+    ].forEach(([title, items, type]) => {
+        rows.push([title]);
+        rows.push(['اللوحة', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
+        items.forEach(item => rows.push([
+            item.plate_number || 'عام',
+            type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type,
+            type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date,
+            type === 'maintenance' ? item.cost : item.amount,
+            item.notes || ''
+        ]));
+        rows.push([]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'المصروفات');
+    XLSX.writeFile(wb, `تقرير_مصروفات_مصفى_${getFleetGroupLabel(filtered.group).replace(/\s+/g, '_')}.xlsx`);
+    closeExpensesFilterModal();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
