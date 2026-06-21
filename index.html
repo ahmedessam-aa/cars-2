@@ -296,6 +296,7 @@
                         <thead>
                             <tr>
                                 <th>اللوحة</th>
+                                <th>اسم السائق</th>
                                 <th>القسم</th>
                                 <th>نوع النفقة</th>
                                 <th>التاريخ</th>
@@ -306,7 +307,7 @@
                         </thead>
                         <tbody id="expensesTable">
                             <tr class="empty-row">
-                                <td colspan="7">لا توجد نفقات مسجلة</td>
+                                <td colspan="8">لا توجد نفقات مسجلة</td>
                             </tr>
                         </tbody>
                     </table>
@@ -707,9 +708,13 @@
                     </div>
                     <div class="form-group">
                         <label>لوحة المركبة</label>
-                        <select id="expensesVehicle">
+                        <select id="expensesVehicle" onchange="updateExpensesDriverName()">
                             <option value="">اختر مركبة (اختياري)</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم السائق</label>
+                        <input type="text" id="expensesDriverName" placeholder="يظهر تلقائياً بعد اختيار المركبة" readonly>
                     </div>
                     <div class="form-group">
                         <label>نوع النفقة *</label>
@@ -725,6 +730,8 @@
                                 <option value="تأمين">تأمين</option>
                                 <option value="مسحات">مسحات</option>
                                 <option value="وقود">وقود</option>
+                                <option value="تصفية عهدة">تصفية عهدة</option>
+                                <option value="تصفية كارتات">تصفية كارتات</option>
                             </select>
                             <input type="text" id="customExpenseType" placeholder="أو اكتب نوع مخصص" style="flex: 1;">
                         </div>

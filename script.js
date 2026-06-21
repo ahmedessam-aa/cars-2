@@ -110,8 +110,8 @@ function exportAllDataToExcel() {
             },
             {
                 name: 'النفقات',
-                headers: ['نوع السيارات', 'اللوحة', 'نوع النفقة', 'التاريخ', 'المبلغ', 'رقم العهدة', 'الملاحظات'],
-                keys: ['fleet_group', 'plate_number', 'expense_type', 'expense_date', 'amount', 'advance_id', 'notes'],
+                headers: ['نوع السيارات', 'اللوحة', 'اسم السائق', 'نوع النفقة', 'التاريخ', 'المبلغ', 'رقم العهدة', 'الملاحظات'],
+                keys: ['fleet_group', 'plate_number', 'driver_name', 'expense_type', 'expense_date', 'amount', 'advance_id', 'notes'],
                 data: appData.expenses
             },
             {
@@ -132,6 +132,9 @@ function exportAllDataToExcel() {
                     }
                     if (key === 'fleet_group') {
                         return getFleetGroupLabel(value);
+                    }
+                    if (key === 'driver_name') {
+                        return getDriverNameByRecord(item);
                     }
                     return value !== undefined && value !== null ? value : '';
                 }));
@@ -2413,6 +2416,11 @@ function getVehicleByRecord(record) {
         null;
 }
 
+function getDriverNameByRecord(record) {
+    const vehicle = getVehicleByRecord(record);
+    return record?.driver_name || vehicle?.vin_number || '';
+}
+
 function getVehicleFleetGroup(vehicle) {
     if (!vehicle) return 'roasted';
     return FLEET_GROUPS.green.statuses.includes(vehicle.status) ? 'green' : 'roasted';
@@ -2479,6 +2487,7 @@ function refreshExpensesModalOptions(selectedVehicleId = '', selectedAdvanceId =
             vehicleSelect.appendChild(option);
         });
     vehicleSelect.value = selectedVehicleId || '';
+    updateExpensesDriverName();
 
     advanceSelect.innerHTML = '<option value="">لم ترتبط بعهدة</option>';
     appData.advance
@@ -2490,6 +2499,15 @@ function refreshExpensesModalOptions(selectedVehicleId = '', selectedAdvanceId =
             advanceSelect.appendChild(option);
         });
     advanceSelect.value = selectedAdvanceId || '';
+}
+
+function updateExpensesDriverName() {
+    const vehicleId = document.getElementById('expensesVehicle')?.value;
+    const driverInput = document.getElementById('expensesDriverName');
+    if (!driverInput) return;
+
+    const vehicle = appData.vehicles.find(v => v.id === vehicleId);
+    driverInput.value = vehicle?.vin_number || '';
 }
 
 function openExpensesModal(expenseId = null) {
@@ -2504,6 +2522,7 @@ function openExpensesModal(expenseId = null) {
         if (expense) {
             document.getElementById('expensesFleetGroup').value = getRecordFleetGroup(expense);
             refreshExpensesModalOptions(expense.vehicle_id || '', expense.advance_id || '');
+            document.getElementById('expensesDriverName').value = getDriverNameByRecord(expense);
             document.getElementById('expensesType').value = expense.is_custom_type ? '' : (expense.expense_type || '');
             document.getElementById('customExpenseType').value = expense.is_custom_type ? expense.expense_type : '';
             document.getElementById('expensesDate').value = expense.expense_date;
@@ -2515,6 +2534,7 @@ function openExpensesModal(expenseId = null) {
         form.reset();
         document.getElementById('expensesFleetGroup').value = 'roasted';
         document.getElementById('customExpenseType').value = '';
+        document.getElementById('expensesDriverName').value = '';
         refreshExpensesModalOptions();
     }
 
@@ -2542,6 +2562,7 @@ function handleExpensesSubmit(e) {
         fleet_group: group,
         vehicle_id: vehicleId || null,
         plate_number: vehicle ? vehicle.plate_number : '',
+        driver_name: vehicle ? (vehicle.vin_number || '') : '',
         expense_type: expenseType,
         is_custom_type: isCustom,
         expense_date: document.getElementById('expensesDate').value,
@@ -2660,7 +2681,9 @@ function filterExpenses() {
 
     const filtered = appData.expenses.filter(expense => {
         const vehiclePlate = expense.plate_number ? expense.plate_number.toLowerCase() : '';
+        const driverName = getDriverNameByRecord(expense).toLowerCase();
         const matchesSearch = vehiclePlate.includes(searchValue) ||
+            driverName.includes(searchValue) ||
             (expense.expense_type ? expense.expense_type.toLowerCase().includes(searchValue) : false) ||
             getFleetGroupLabel(getRecordFleetGroup(expense)).toLowerCase().includes(searchValue);
         const matchesGroup = !groupFilter || getRecordFleetGroup(expense) === groupFilter;
@@ -2671,16 +2694,18 @@ function filterExpenses() {
     tbody.innerHTML = '';
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">لا توجد نفقات مسجلة</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">لا توجد نفقات مسجلة</td></tr>';
         return;
     }
 
     filtered.forEach(expense => {
         const group = getRecordFleetGroup(expense);
         const vehiclePlate = expense.plate_number || 'عام';
+        const driverName = getDriverNameByRecord(expense) || '-';
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${vehiclePlate}</td>
+            <td>${driverName}</td>
             <td><span class="fleet-pill ${group}">${getFleetGroupLabel(group)}</span></td>
             <td>${expense.expense_type}</td>
             <td>${expense.expense_date}</td>
@@ -2721,12 +2746,14 @@ function buildProfessionalReportHTML({ group, title, includeAdvance, data }) {
 
     const renderRows = (items, type) => items.map((item, index) => {
         const plate = item.plate_number || 'عام';
+        const driverName = getDriverNameByRecord(item) || '-';
         const name = type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type;
         const date = type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date;
         const amount = type === 'maintenance' ? item.cost : item.amount;
         return `
             <tr style="background:${index % 2 ? '#ffffff' : '#f7f9fb'};">
                 <td>${plate}</td>
+                <td>${driverName}</td>
                 <td>${name || '-'}</td>
                 <td>${date || '-'}</td>
                 <td class="amount">${Number(amount || 0).toLocaleString('en-US')}</td>
@@ -2745,6 +2772,7 @@ function buildProfessionalReportHTML({ group, title, includeAdvance, data }) {
                 <thead>
                     <tr>
                         <th>اللوحة</th>
+                        <th>اسم السائق</th>
                         <th>البيان</th>
                         <th>التاريخ</th>
                         <th>المبلغ</th>
@@ -2752,12 +2780,12 @@ function buildProfessionalReportHTML({ group, title, includeAdvance, data }) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rows || `<tr><td colspan="5" class="empty-report">${emptyText}</td></tr>`}
+                    ${rows || `<tr><td colspan="6" class="empty-report">${emptyText}</td></tr>`}
                 </tbody>
                 ${rows ? `
                     <tfoot>
                         <tr class="total-row">
-                            <td colspan="3">الإجمالي</td>
+                            <td colspan="4">الإجمالي</td>
                             <td class="amount">${Number(total || 0).toLocaleString('en-US')}</td>
                             <td>جنيه</td>
                         </tr>
@@ -2920,10 +2948,11 @@ function exportFinancialReportExcel(group, includeAdvance, fileName) {
 
     const pushSection = (title, items, type) => {
         rows.push([title]);
-        rows.push(['اللوحة', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
+        rows.push(['اللوحة', 'اسم السائق', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
         items.forEach(item => {
             rows.push([
                 item.plate_number || 'عام',
+                getDriverNameByRecord(item) || '',
                 type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type,
                 type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date,
                 type === 'maintenance' ? item.cost : item.amount,
@@ -3005,9 +3034,10 @@ function generateFilteredExpensesReportExcel() {
         ['النفقات', filtered.filteredExpenses, 'expense']
     ].forEach(([title, items, type]) => {
         rows.push([title]);
-        rows.push(['اللوحة', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
+        rows.push(['اللوحة', 'اسم السائق', 'البيان', 'التاريخ', 'المبلغ', 'ملاحظات']);
         items.forEach(item => rows.push([
             item.plate_number || 'عام',
+            getDriverNameByRecord(item) || '',
             type === 'maintenance' ? item.maintenance_type : type === 'violation' ? item.violation_type : item.expense_type,
             type === 'maintenance' ? item.maintenance_date : type === 'violation' ? item.violation_date : item.expense_date,
             type === 'maintenance' ? item.cost : item.amount,
