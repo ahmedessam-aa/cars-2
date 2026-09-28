@@ -1867,3 +1867,228 @@ body.auth-locked #mainSystem { display: none; }
 .sync-saving { color: var(--warning-color); }
 .sync-error { color: var(--danger-color); background: #fdecea; }
 @media print { .sync-status, #logoutBtn, .auth-overlay { display: none !important; } }
+
+
+/* =====================================================================
+   ريسبونسيف للموبايل والتابلت
+   ===================================================================== */
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; }
+.menu-toggle, .sidebar-backdrop { display: none; }
+.container { grid-template-columns: 250px minmax(0, 1fr); }
+.main-content { min-width: 0; }
+
+/* ---------- تابلت وموبايل: القائمة الجانبية تبقى درج بيفتح بزرار ---------- */
+@media (max-width: 900px) {
+    .container {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+    }
+
+    header {
+        grid-column: 1;
+        grid-row: 1;
+        position: sticky;
+        top: 0;
+        z-index: 900;
+        padding: 10px 14px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        text-align: right;
+    }
+
+    .header-brand { gap: 10px; min-width: 0; flex: 1 1 auto; }
+    .header-logo { width: 42px; height: 42px; padding: 3px; border-radius: 10px; flex-shrink: 0; }
+    .header-content h1 { font-size: 17px; margin: 0; line-height: 1.3; }
+    .header-content .subtitle { font-size: 11px; }
+
+    .header-info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        text-align: initial;
+        flex-shrink: 0;
+    }
+    .header-info .btn { padding: 7px 10px; font-size: 12px; white-space: nowrap; }
+    .date-time { display: none; }
+
+    .menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px; height: 42px;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 255, 255, .35);
+        background: rgba(255, 255, 255, .12);
+        color: #fff;
+        font-size: 22px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .sidebar {
+        display: block;
+        position: fixed;
+        top: 0; bottom: 0;
+        right: 0; left: auto;
+        width: min(280px, 82vw);
+        height: 100%;
+        z-index: 1001;
+        padding: calc(20px + env(safe-area-inset-top, 0px)) 0 calc(20px + env(safe-area-inset-bottom, 0px));
+        transform: translateX(105%);
+        transition: transform .28s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .nav-link { padding: 14px 18px; font-size: 16px; }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed; inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, .5);
+        opacity: 0; visibility: hidden;
+        transition: opacity .28s ease, visibility .28s;
+    }
+    .sidebar-backdrop.show { opacity: 1; visibility: visible; }
+    body.menu-open { overflow: hidden; }
+
+    .main-content {
+        grid-column: 1;
+        grid-row: 2;
+        padding: 14px;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .card:hover { transform: none; }
+    .section-header { flex-direction: column; align-items: stretch; gap: 12px; }
+    .section-header h2 { font-size: 20px; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .header-actions .btn { flex: 1 1 calc(50% - 8px); }
+}
+
+/* ---------- موبايل ---------- */
+@media (max-width: 640px) {
+    .main-content { padding: 10px; }
+    .card { padding: 14px; }
+    .dashboard-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card { flex-direction: column; text-align: center; padding: 12px; gap: 4px; }
+    .stat-card h3 { font-size: 12px; }
+    .stat-icon { font-size: 26px; }
+    .stat-number { font-size: 20px; }
+
+    .summary-strip { gap: 8px; }
+    .summary-chip { flex: 1 1 calc(50% - 8px); min-width: 0; padding: 8px 10px; }
+
+    .form-row { grid-template-columns: 1fr; gap: 12px; }
+    .form-group[style*="grid-column"] { grid-column: auto !important; }
+
+    /* حقول أكبر + منع الزوم التلقائي في iOS */
+    input, select, textarea { font-size: 16px !important; }
+    .btn { min-height: 40px; }
+
+    .filters { flex-direction: column; gap: 10px; }
+    .filters > *, .search-input, .filter-select { width: 100%; }
+    .filter-date-label { display: flex; align-items: center; gap: 8px; }
+    .filter-date-label input { flex: 1; }
+
+    .tab-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .tab-btn { white-space: nowrap; flex-shrink: 0; }
+
+    .advance-summary { flex-wrap: wrap !important; }
+    .advance-ledger-grid { grid-template-columns: 1fr; }
+    .reports-grid { grid-template-columns: 1fr; }
+
+    /* النوافذ المنبثقة بملء الشاشة تقريبًا */
+    .modal.show { align-items: flex-end; }
+    .modal-content {
+        width: 100%; max-width: 100%;
+        max-height: 94vh; max-height: 94dvh;
+        padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+        border-radius: 16px 16px 0 0;
+    }
+    .modal-content h2 { font-size: 18px; }
+    .form-actions { flex-direction: column-reverse; gap: 8px; }
+    .form-actions button { width: 100%; }
+    .action-buttons { flex-wrap: wrap; }
+}
+
+/* ---------- الجداول كبطاقات على الموبايل (للشاشة فقط، مش للطباعة) ---------- */
+@media screen and (max-width: 640px) {
+    .main-content .table-container { overflow: visible; max-height: none !important; }
+    .main-content .table-container .data-table,
+    .main-content .table-container .data-table tbody,
+    .main-content .table-container .data-table tr,
+    .main-content .table-container .data-table td {
+        display: block;
+        width: 100%;
+    }
+    .main-content .table-container .data-table { background: transparent; box-shadow: none; overflow: visible; }
+    .main-content .table-container .data-table thead { display: none; }
+
+    .main-content .table-container .data-table tbody tr {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-right: 4px solid var(--secondary-color);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        margin-bottom: 12px;
+        padding: 6px 12px;
+    }
+    .main-content .table-container .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0 !important;
+        font-size: 14px !important;
+        text-align: left;
+        border-bottom: 1px dashed #e3eaed;
+        word-break: break-word;
+    }
+    .main-content .table-container .data-table td:last-child { border-bottom: none; }
+    .main-content .table-container .data-table td[data-label]::before {
+        content: attr(data-label);
+        flex: 0 0 38%;
+        max-width: 38%;
+        font-weight: 700;
+        font-size: 12px;
+        color: #6b7c85;
+        text-align: right;
+    }
+    .main-content .table-container .data-table td:not([data-label]) { justify-content: center; text-align: center; }
+    .main-content .table-container .data-table td[data-label=""]::before { display: none; }
+    .main-content .table-container .data-table td .action-buttons { justify-content: flex-end; width: 100%; }
+    .main-content .table-container .data-table td .status-badge { width: auto; }
+    .main-content .table-container .data-table tr.empty-row { border-right-color: var(--border-color); box-shadow: none; }
+    .main-content .table-container .data-table td img { max-width: 80px; height: auto; }
+}
+
+/* ---------- شاشات صغيرة جدًا ---------- */
+@media (max-width: 380px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .header-info .btn { padding: 6px 8px; font-size: 11px; }
+    .header-content h1 { font-size: 15px; }
+}
+
+@media print {
+    .menu-toggle, .sidebar-backdrop { display: none !important; }
+}
+
+/* تصحيح: القائمة عمودية داخل الدرج (بتلغي قواعد الشريط الأفقي القديمة) */
+@media (max-width: 900px) {
+    .sidebar { overflow-x: hidden; overflow-y: auto; top: 0; }
+    .nav-menu { display: block; }
+    .nav-link {
+        white-space: normal;
+        border-right: 4px solid transparent;
+        border-bottom: none;
+        margin: 4px 10px;
+    }
+    .nav-link.active { border-right-color: #71d1ca; border-bottom-color: transparent; }
+}

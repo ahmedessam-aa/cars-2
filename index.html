@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#22313a">
     <title>نظام إدارة المركبات - مصنع البهنساوي</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -30,6 +31,7 @@
         <!-- الرأس -->
         <header class="header">
             <div class="header-brand">
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="القائمة" aria-expanded="false">☰</button>
                 <img src="5.jpg" alt="شعار المصنع" class="header-logo">
                 <div class="header-content">
                     <h1>مصنع البهنساوي</h1>
@@ -45,7 +47,8 @@
         </header>
 
         <!-- الشريط الجانبي -->
-        <nav class="sidebar">
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+        <nav class="sidebar" id="sidebar">
             <ul class="nav-menu">
                 <li><a href="#" data-section="dashboard" class="nav-link active">📊 لوحة التحكم</a></li>
                 <li><a href="#" data-section="vehicles" class="nav-link">🚗 المركبات</a></li>
@@ -1520,5 +1523,6 @@
     <script src="auth.js"></script>
     <script src="script.js"></script>
     <script src="receipts.js"></script>
+    <script src="responsive.js"></script>
 </body>
 </html>
