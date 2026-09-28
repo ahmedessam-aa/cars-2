@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // الوضع الافتراضي (SHARED_DATA = false): كل يوزر يوصل لبياناته بس
+    match /users/{uid}/store/{doc} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // لو فعلت SHARED_DATA = true: أي يوزر مسجّل يوصل للداتا المشتركة
+    match /shared/{doc} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
