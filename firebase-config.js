@@ -14,4 +14,4 @@ window.FIREBASE_CONFIG = {
 window.SHARED_DATA = false;
 
 // يتم إضافته تلقائيًا لاسم المستخدم لو مكتبتش إيميل (لازم يطابق الإيميلات اللي عملتها في Firebase)
-window.LOGIN_EMAIL_DOMAIN = "bahnasawy.app";
+window.LOGIN_EMAIL_DOMAIN = "bahnasawy.com";
