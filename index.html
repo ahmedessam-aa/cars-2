@@ -210,6 +210,7 @@
                         <button class="btn btn-warning" onclick="openPenaltyModal()">+ ورقة خصم / جزاء</button>
                         <button class="btn btn-info" onclick="triggerLegacyImport()" title="استيراد ملفات JSON من نظام إقرار استلام السيارة القديم">📥 استيراد من النظام القديم</button>
                         <input type="file" id="legacyImportFile" accept=".json,application/json" class="hidden">
+                        <button class="btn btn-success" onclick="syncAllVehiclesFromHandovers()" title="تحديث السائق ورقم الشاسيه ورقم الموتور وبيانات الرخصة لكل مركبة من آخر إقرار استلام ليها">🔄 تحديث بيانات المركبات من الاستلام</button>
                     </div>
                 </div>
                 <div class="summary-strip" id="handoversSummary"></div>

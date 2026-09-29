@@ -59,6 +59,22 @@ function lastReceiveDate(vehicle) {
     return h ? (h.delivery_date || '') : '';
 }
 
+// بعد حفظ/حذف إقرار استلام: بيانات المركبة (السائق الحالي، رقم الشاسيه، رقم الموتور،
+// بداية وانتهاء الرخصة) بتتحدث تلقائيًا من آخر إقرار استلام مسجّل للمركبة دي،
+// عشان محتاجش تعدّل على بيانات المركبة يدويًا كل مرة.
+function syncVehicleFromHandover(vehicleId) {
+    if (!vehicleId) return;
+    const vehicle = appData.vehicles.find(v => v.id === vehicleId);
+    if (!vehicle) return;
+    const latest = getLastHandover(vehicle);
+    if (!latest) return;
+    if (latest.delegate_name) vehicle.vin_number = latest.delegate_name;
+    if (latest.chassis_number) vehicle.chassis_number = latest.chassis_number;
+    if (latest.engine_number) vehicle.engine_number = latest.engine_number;
+    if (latest.license_start) vehicle.license_start = latest.license_start;
+    if (latest.license_expiry) vehicle.license_expiry = latest.license_expiry;
+}
+
 function fleetBadgeClass(status) {
     if (status === 'اخضر') return 'badge-green';
     if (status === 'مطحون') return 'badge-roasted';
@@ -450,6 +466,7 @@ function handleHandoverSubmit(e) {
     } else {
         appData.handovers.push(record);
     }
+    syncVehicleFromHandover(record.vehicle_id);
 
     saveData();
     closeHandoverModal();
@@ -461,13 +478,26 @@ function handleHandoverSubmit(e) {
 
 function deleteHandover(id) {
     if (!confirm('هل أنت متأكد من حذف إقرار الاستلام ده؟')) return;
+    const removed = appData.handovers.find(h => h.id === id);
     appData.handovers = appData.handovers.filter(h => h.id !== id);
+    if (removed) syncVehicleFromHandover(removed.vehicle_id);
     saveData();
     populateHandovers();
     populateVehiclesList();
     renderDashboard();
     const historyModal = byId('handoverHistoryModal');
     if (historyModal.classList.contains('show') && historyModal.dataset.vehicleId) showHandoverHistory(historyModal.dataset.vehicleId);
+}
+
+// تحديث يدوي لكل المركبات مرة واحدة: مفيد لو في إقرارات استلام اتسجلت
+// قبل ما التحديث التلقائي يتفعّل، فبتحدّث بيانات كل مركبة من آخر إقرار استلام ليها.
+function syncAllVehiclesFromHandovers() {
+    if (!confirm('هيتم تحديث اسم السائق ورقم الشاسيه ورقم الموتور وبداية وانتهاء الرخصة لكل مركبة من آخر إقرار استلام مسجّل ليها. تكمل؟')) return;
+    appData.vehicles.forEach(v => syncVehicleFromHandover(v.id));
+    saveData();
+    populateVehiclesList();
+    renderDashboard();
+    alert('تم تحديث بيانات المركبات من إقرارات الاستلام.');
 }
 
 /* ---------------------------------------------------------------------
