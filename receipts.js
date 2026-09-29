@@ -19,6 +19,7 @@ const HO_FIELDS = {
     hoLicStart: 'license_start', hoLicEnd: 'license_expiry', hoAccessories: 'accessories',
     hoDelegate: 'delegate_name', hoJob: 'job_title', hoDept: 'department',
     hoNationalId: 'national_id', hoDate: 'delivery_date', hoSigner: 'signature_name',
+    hoResponsible: 'responsible_name',
     hoFingerprint: 'fingerprint', hoNotes: 'notes'
 };
 const PN_FIELDS = {
@@ -284,7 +285,7 @@ function filterHandovers() {
     if (!tbody) return;
     const rows = getFilteredHandovers();
     if (!rows.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="9">لا توجد إقرارات استلام</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="10">لا توجد إقرارات استلام</td></tr>';
         return;
     }
     tbody.innerHTML = rows.map(h => `
@@ -295,6 +296,7 @@ function filterHandovers() {
             <td>${escapeHtml(h.delegate_name) || '-'}</td>
             <td>${escapeHtml([h.job_title, h.department].filter(Boolean).join(' - ')) || '-'}</td>
             <td><strong>${escapeHtml(h.signature_name) || '-'}</strong></td>
+            <td>${escapeHtml(h.responsible_name) || '-'}</td>
             <td>${escapeHtml(h.fingerprint) || '-'}</td>
             <td>${escapeHtml(h.notes) || '-'}</td>
             <td>
@@ -616,6 +618,7 @@ function handoverDocFragment(h) {
             ${item('تاريخ نهاية الرخصة', fmtArDate(h.license_expiry))}
             ${item('العدة والملحقات', h.accessories, true)}
             ${item('اسم من قام بالتوقيع', h.signature_name)}
+            ${item('مسؤول الحركة', h.responsible_name)}
             ${item('البصمة / ملاحظات البصمة', h.fingerprint)}
             ${item('ملاحظات', h.notes, true)}
         </div>
@@ -713,11 +716,12 @@ function generateHandoversReportHTML() {
     ]);
     const main = rows.length
         ? reportTable(
-            ['تاريخ الاستلام', 'اللوحة', 'السيارة', 'المستلم', 'الوظيفة / الإدارة', 'اسم الموقّع', 'البصمة', 'الملاحظات'],
+            ['تاريخ الاستلام', 'اللوحة', 'السيارة', 'المستلم', 'الوظيفة / الإدارة', 'اسم الموقّع', 'مسؤول الحركة', 'البصمة', 'الملاحظات'],
             rows.map(h => [
                 escapeHtml(h.delivery_date) || '-', escapeHtml(h.plate_number), escapeHtml(h.vehicle_name) || '-',
                 escapeHtml(h.delegate_name) || '-', escapeHtml([h.job_title, h.department].filter(Boolean).join(' - ')) || '-',
-                `<b>${escapeHtml(h.signature_name) || '-'}</b>`, escapeHtml(h.fingerprint) || '-', escapeHtml(h.notes) || '-'
+                `<b>${escapeHtml(h.signature_name) || '-'}</b>`, escapeHtml(h.responsible_name) || '-',
+                escapeHtml(h.fingerprint) || '-', escapeHtml(h.notes) || '-'
             ]))
         : '<p style="text-align:center;color:#888;">لا توجد إقرارات في الفترة المحددة</p>';
     const last = reportTable(
@@ -735,9 +739,9 @@ function generateHandoversReportExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
         ['تقرير استلام السيارات'], [subtitle], [],
-        ['تاريخ الاستلام', 'اللوحة', 'السيارة', 'المستلم', 'الوظيفة', 'الإدارة', 'الرقم القومي', 'اسم الموقّع', 'البصمة', 'الملاحظات'],
+        ['تاريخ الاستلام', 'اللوحة', 'السيارة', 'المستلم', 'الوظيفة', 'الإدارة', 'الرقم القومي', 'اسم الموقّع', 'مسؤول الحركة', 'البصمة', 'الملاحظات'],
         ...rows.map(h => [h.delivery_date || '', h.plate_number, h.vehicle_name || '', h.delegate_name || '', h.job_title || '',
-            h.department || '', h.national_id || '', h.signature_name || '', h.fingerprint || '', h.notes || ''])
+            h.department || '', h.national_id || '', h.signature_name || '', h.responsible_name || '', h.fingerprint || '', h.notes || ''])
     ]), 'الاستلام');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
         ['آخر مستلم لكل سيارة'], [subtitle], [],

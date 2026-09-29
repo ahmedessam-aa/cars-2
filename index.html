@@ -237,13 +237,14 @@
                                     <th>المستلم</th>
                                     <th>الوظيفة / الإدارة</th>
                                     <th>اسم الموقّع</th>
+                                    <th>مسؤول الحركة</th>
                                     <th>البصمة</th>
                                     <th>الملاحظات</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="handoversTable">
-                                <tr class="empty-row"><td colspan="9">لا توجد إقرارات استلام</td></tr>
+                                <tr class="empty-row"><td colspan="10">لا توجد إقرارات استلام</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1439,9 +1440,13 @@
                     <div class="form-group"><label>اسم من قام بالتوقيع *</label><input type="text" id="hoSigner" required placeholder="اسم الموظف أو المندوب"></div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group"><label>مسؤول الحركة اللي قام بالاستلام</label><input type="text" id="hoResponsible" placeholder="اسم مسؤول الحركة"></div>
                     <div class="form-group"><label>البصمة / ملاحظات البصمة</label><input type="text" id="hoFingerprint"></div>
-                    <div class="form-group"><label>ملاحظات</label><textarea id="hoNotes" rows="2" placeholder="أي ملاحظات أو حالة السيارة"></textarea></div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: 1/-1;"><label>ملاحظات</label><textarea id="hoNotes" rows="2" placeholder="أي ملاحظات أو حالة السيارة"></textarea></div>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">حفظ</button>
                     <button type="button" class="btn btn-secondary" onclick="closeHandoverModal()">إلغاء</button>
